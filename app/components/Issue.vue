@@ -19,7 +19,7 @@ const stateIcons: Record<Issue['state'], string> = {
 <template>
   <div class="flex items-center gap-2 sm:gap-4">
     <a
-      :href="data.author.avatar ? `https://github.com/${data.author.username}` : '#'"
+      :href="data.author.username ? `https://github.com/${data.author.username}` : '#'"
       target="_blank"
       class="size-10 sm:size-12 shrink-0 border border-neutral-200 dark:border-neutral-800 overflow-hidden shadow-sm rounded-full"
     >
