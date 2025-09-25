@@ -4,4 +4,9 @@ export default defineAppConfig({
       neutral: 'zinc',
     },
   },
+  // Repository configuration
+  repo: {
+    owner: 'nuxt', // organization/user
+    name: 'nuxt', // repository
+  },
 })
