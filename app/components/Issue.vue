@@ -18,18 +18,32 @@ const stateIcons: Record<Issue['state'], string> = {
 
 <template>
   <div class="flex items-center gap-2 sm:gap-4">
-    <a
-      :href="data.author.username ? `https://github.com/${data.author.username}` : '#'"
-      target="_blank"
-      class="size-10 sm:size-12 shrink-0 border border-neutral-200 dark:border-neutral-800 overflow-hidden shadow-sm rounded-full"
-    >
-      <img
-        :src="data.author.avatar"
-        :alt="data.author.username"
-        class="size-full"
-        loading="lazy"
+    <template v-if="data.author.username">
+      <a
+        :href="`https://github.com/${data.author.username}`"
+        target="_blank"
+        class="size-10 sm:size-12 shrink-0 border border-neutral-200 dark:border-neutral-800 overflow-hidden shadow-sm rounded-full"
       >
-    </a>
+        <img
+          :src="data.author.avatar"
+          :alt="data.author.username"
+          class="size-full"
+          loading="lazy"
+        >
+      </a>
+    </template>
+    <template v-else>
+      <div
+        class="size-10 sm:size-12 shrink-0 border border-neutral-200 dark:border-neutral-800 overflow-hidden shadow-sm rounded-full"
+      >
+        <img
+          :src="data.author.avatar"
+          :alt="data.author.username"
+          class="size-full"
+          loading="lazy"
+        >
+      </div>
+    </template>
 
     <div class="flex-1 flex justify-between gap-2 lg:gap-4 min-w-0">
       <div class="flex flex-col min-w-0 gap-0.5 sm:gap-1">
