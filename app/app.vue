@@ -11,7 +11,7 @@ useHead({
     <NuxtPage />
     <p class="py-6 pb-10 text-sm flex items-center justify-center gap-2 flex-wrap px-4">
       <UButton
-        to="https://github.com/atinux/my-pull-requests"
+        to="https://github.com/AdrianoCahete/nuxt-status-page"
         rel="noopener"
         target="_blank"
         color="neutral"
@@ -22,7 +22,7 @@ useHead({
         Source code
       </UButton>
       <UButton
-        to="https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fatinux%2Fmy-pull-requests&env=NUXT_GITHUB_TOKEN&envDescription=Create%20a%20GitHub%20token%20with%20no%20special%20scope.&envLink=https%3A%2F%2Fgithub.com%2Fsettings%2Fpersonal-access-tokens%2Fnew&project-name=my-pull-requests&demo-title=My%20Pull%20Requests&demo-description=Create%20a%20website%20with%20an%20RSS%20feed%20of%20your%20recent%20GitHub%20pull%20requests%20across%20the%20Open%20Source%20projects%20you%20contribute%20to.&demo-url=https%3A%2F%2Fprs.atinux.com&demo-image=https%3A%2F%2Fprs.atinux.com%2Fog.png"
+        to="https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FAdrianoCahete%2Fnuxt-status-page&env=NUXT_GITHUB_TOKEN,NUXT_REPO_OWNER,NUXT_REPO_NAME&envDescription=Create%20a%20GitHub%20token%20and%20set%20repository%20details.&envLink=https%3A%2F%2Fgithub.com%2Fsettings%2Fpersonal-access-tokens%2Fnew&project-name=repository-status-page&demo-title=Repository%20Status%20Page&demo-description=Create%20a%20website%20with%20an%20RSS%20feed%20to%20track%20issues%20from%20any%20GitHub%20repository."
         target="_blank"
         rel="noopener"
         color="neutral"

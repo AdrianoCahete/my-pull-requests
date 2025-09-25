@@ -1,46 +1,61 @@
 export default defineEventHandler(async () => {
   const octokit = useOctokit()
-  // Fetch user from token
-  const userResponse = await octokit.request('GET /user')
-  const user: User = {
-    name: userResponse.data.name ?? userResponse.data.login,
-    username: userResponse.data.login,
-    avatar: userResponse.data.avatar_url,
+  const config = useAppConfig()
+
+  // Get repository configuration from environment variables or app config
+  const repoOwner = process.env.NUXT_REPO_OWNER || config.repo?.owner || 'nuxt'
+  const repoName = process.env.NUXT_REPO_NAME || config.repo?.name || 'nuxt'
+
+  // Fetch repository details
+  const repo = await fetchRepo(repoOwner, repoName)
+
+  const repository: Repository = {
+    owner: repo.owner.login,
+    name: repo.name,
+    fullName: repo.full_name,
+    description: repo.description,
+    avatar: repo.owner.avatar_url,
+    stars: repo.stargazers_count,
+    type: repo.owner.type,
   }
-  // Fetch pull requests from user
-  const { data } = await octokit.request('GET /search/issues', {
-    // To exclude the pull requests to your repositories
-    // q: `type:pr+author:"${user.username}"+-user:"${user.username}"`,
-    // To include the pull requests to your repositories
-    q: `type:pr+author:"${user.username}"`,
-    per_page: 50,
-    page: 1,
-    advanced_search: 'true',
-  })
 
-  // Filter out closed PRs that are not merged
-  const filteredPrs = data.items.filter(pr => !(pr.state === 'closed' && !pr.pull_request?.merged_at))
+  // Fetch issues from the repository
+  const { data: issuesData } = await octokit.request(
+    'GET /repos/{owner}/{repo}/issues',
+    {
+      owner: repoOwner,
+      repo: repoName,
+      state: 'all',
+      per_page: 50,
+      sort: 'updated',
+      direction: 'desc',
+    },
+  )
 
-  const prs: PullRequest[] = []
-  // For each PR, fetch the repository details
-  for (const pr of filteredPrs) {
-    const [owner, name] = pr.repository_url.split('/').slice(-2)
-    const repo = await fetchRepo(owner!, name!)
+  // Filter out pull requests (GitHub API includes PRs in issues endpoint)
+  const filteredIssues = issuesData.filter(issue => !issue.pull_request)
 
-    prs.push({
-      repo: `${owner}/${name}`,
-      title: pr.title,
-      url: pr.html_url,
-      created_at: pr.created_at,
-      state: pr.pull_request?.merged_at ? 'merged' : pr.draft ? 'draft' : pr.state as 'open' | 'closed',
-      number: pr.number,
-      type: repo.owner.type, // Add type information (User or Organization)
-      stars: repo.stargazers_count,
-    })
-  }
+  const issues: Issue[] = filteredIssues.map(issue => ({
+    title: issue.title,
+    url: issue.html_url,
+    created_at: issue.created_at,
+    updated_at: issue.updated_at,
+    state: issue.state as 'open' | 'closed',
+    number: issue.number,
+    author: {
+      username: issue.user ? issue.user.login : 'unknown',
+      avatar: issue.user ? issue.user.avatar_url : '',
+    },
+    labels:
+      issue.labels?.map(label => ({
+        name: typeof label === 'string' ? label : label.name || '',
+        color: typeof label === 'string' ? '000000' : label.color || '000000',
+      })) || [],
+    comments: issue.comments || 0,
+  }))
 
   return {
-    user,
-    prs,
-  } as Contributions
+    repository,
+    issues,
+  } as RepoStatus
 })
