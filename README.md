@@ -35,6 +35,26 @@ Configure your environment variables in the `.env` file:
 NUXT_GITHUB_TOKEN=your-github-token
 ```
 
+### GitHub Token Requirements
+
+The `NUXT_GITHUB_TOKEN` is **optional** depending on your use case:
+
+**You can skip the GitHub token if:**
+- ✅ You're only accessing **public repositories**
+- ✅ Your traffic is low (under **60 requests/hour**)
+- ✅ You don't mind the lower rate limits
+
+**You need the GitHub token if:**
+- ❌ You need to access **private repositories**
+- ❌ You expect **high traffic** that might exceed 60 requests/hour
+- ❌ You want **better rate limits** (5,000/hour vs 60/hour)
+
+**Rate Limits:**
+- **Without token**: 60 requests per hour per IP address
+- **With token**: 5,000 requests per hour
+
+## Repository Configuration
+
 You can configure the repository in `app/app.config.ts`:
 
 ```typescript
