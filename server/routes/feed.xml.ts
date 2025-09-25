@@ -1,31 +1,45 @@
 import { Feed } from 'feed'
-import { joinURL } from 'ufo'
 import { getRequestURL } from 'h3'
+import { joinURL } from 'ufo'
 
 export default defineEventHandler(async (event) => {
   const domain = getRequestURL(event).origin
-  const { user, prs } = await $fetch <Contributions> ('/api/contributions')
+  const { repository, issues } = await $fetch<RepoStatus>('/api/contributions')
   const feed = new Feed({
-    title: `${user.name} is contributing...`,
-    description: `Discover ${user.name}'s recent pull requests on GitHub`,
+    title: `${repository.fullName} Issues`,
+    description: `Latest issues and updates from ${repository.fullName} repository`,
     id: domain,
     link: domain,
     language: 'en',
     image: joinURL(domain, 'favicon.png'),
     favicon: joinURL(domain, 'favicon.png'),
-    copyright: `CC BY-NC-SA 4.0 2024 © ${user.name}`,
+    copyright: `CC BY-NC-SA 4.0 2024 © ${repository.owner}`,
     feedLinks: {
       rss: `${domain}/rss.xml`,
     },
   })
 
-  for (const pr of prs) {
+  for (const issue of issues) {
+    const stateText = issue.state === 'open' ? '🟢 Open' : '🟣 Closed'
+    const labelsText = issue.labels.length > 0 
+      ? ` | Labels: ${issue.labels.map(l => l.name).join(', ')}` 
+      : ''
+    
     feed.addItem({
-      link: pr.url,
-      date: new Date(pr.created_at),
-      title: pr.title,
-      image: `https://github.com/${pr.repo.split('/')[0]}.png`,
-      description: `<a href="${pr.url}">${pr.title}</a>`,
+      link: issue.url,
+      date: new Date(issue.updated_at),
+      title: `${stateText}: ${issue.title}`,
+      author: [{
+        name: issue.author.username,
+        link: `https://github.com/${issue.author.username}`,
+      }],
+      description: `
+        <p><strong>Issue #${issue.number}</strong> ${stateText}</p>
+        <p>Author: <a href="https://github.com/${issue.author.username}">@${issue.author.username}</a></p>
+        <p>Comments: ${issue.comments}</p>
+        ${labelsText}
+        <p><a href="${issue.url}">View Issue</a></p>
+      `,
     })
   }
 
