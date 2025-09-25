@@ -1,18 +1,18 @@
-# Showcase your Open Source Contributions 🤍
+# Nuxt Status Page - Based on Github Issues
 
-Create a website with an RSS feed of your recent GitHub pull requests across the Open Source projects you contribute to.
+Create a status page using Github Issues.
 
-![atinux-pull-requests](https://github.com/user-attachments/assets/cfa82cc2-51af-4fd4-9012-1f8517dd370f)
-
-Demo: https://prs.atinux.com
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fatinux%2Fmy-pull-requests&env=NUXT_GITHUB_TOKEN&envDescription=Create%20a%20GitHub%20token%20with%20no%20special%20scope.&envLink=https%3A%2F%2Fgithub.com%2Fsettings%2Fpersonal-access-tokens%2Fnew&project-name=my-pull-requests&demo-title=My%20Pull%20Requests&demo-description=Create%20a%20website%20with%20an%20RSS%20feed%20of%20your%20recent%20GitHub%20pull%20requests%20across%20the%20Open%20Source%20projects%20you%20contribute%20to.&demo-url=https%3A%2F%2Fprs.atinux.com&demo-image=https%3A%2F%2Fprs.atinux.com%2Fog.png)
+Based on the good [My Pull Requests](https://github.com/atinux/my-pull-requests) by [Sébastien Chopin (atinux)](https://github.com/atinux).
 
 ## Features
 
-- List the 50 most recent pull requests you've contributed to.
-- RSS feed
-- Only add your GitHub token to get started
+- Track recent issues from any GitHub repository
+- RSS feed for staying updated
+- Support for both user and organization repositories
+- Real-time status indicators (open/closed issues)
+
+Not tested, but may work because it's on top of MPR:  
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FAdrianoCahete%2Fnuxt-status-page&env=NUXT_GITHUB_TOKEN,NUXT_REPO_OWNER,NUXT_REPO_NAME&envDescription=Create%20a%20GitHub%20token%20and%20set%20repository%20details.&envLink=https%3A%2F%2Fgithub.com%2Fsettings%2Fpersonal-access-tokens%2Fnew&project-name=repository-status-page&demo-title=Repository%20Status%20Page&demo-description=Create%20a%20website%20with%20an%20RSS%20feed%20to%20track%20issues%20from%20any%20GitHub%20repository.)
 
 ## Setup
 
@@ -22,16 +22,29 @@ Make sure to install the dependencies with [pnpm](https://pnpm.io/installation#u
 pnpm install
 ```
 
-Copy the `.env.example` file to `.env` and fill in your GitHub token:
+Copy the `.env.example` file to `.env` and configure your settings:
 
 ```bash
 cp .env.example .env
 ```
 
-Create a GitHub token with no special scope on [GitHub](https://github.com/settings/personal-access-tokens/new) and set it in the `.env` file:
+Configure your environment variables in the `.env` file:
 
 ```bash
+# Create a GitHub token with no special scope
 NUXT_GITHUB_TOKEN=your-github-token
+```
+
+You can configure the repository in `app/app.config.ts`:
+
+```typescript
+export default defineAppConfig({
+  // ... other config
+  repo: {
+    owner: 'nuxt', // Repository owner (user or organization)
+    name: 'nuxt',     // Repository name
+  },
+})
 ```
 
 ## Development Server
@@ -52,7 +65,8 @@ pnpm build
 
 ## Credits
 
-This project is inspired by [Anthony Fu](https://github.com/antfu)'s [releases.antfu.me](https://github.com/antfu/releases.antfu.me) project.
+This project is inspired and based on the good [My Pull Requests](https://github.com/atinux/my-pull-requests) by [Sébastien Chopin (atinux)](https://github.com/atinux).
+that was originally inspired by [Anthony Fu](https://github.com/antfu)'s [releases.antfu.me](https://github.com/antfu/releases.antfu.me) project.
 
 ## License
 
