@@ -1,27 +1,31 @@
 <script setup lang="ts">
 const colorMode = useColorMode()
-const { data: contributions } = await useFetch <Contributions> ('/api/contributions')
+const { data: repoStatus } = await useFetch<RepoStatus>('/api/contributions')
 
-if (!contributions.value) {
-  throw createError('Could not load User activity')
+if (!repoStatus.value) {
+  throw createError('Could not load repository status')
 }
 
-const { user, prs } = contributions.value
-const userUrl = `https://github.com/${user.username}`
+const { repository, issues } = repoStatus.value
+const repoUrl = `https://github.com/${repository.fullName}`
+const ownerUrl = `https://github.com/${repository.owner}`
+
+const openIssues = issues.filter(issue => issue.state === 'open')
+const closedIssues = issues.filter(issue => issue.state === 'closed')
 
 useHead({
   link: [
     { rel: 'icon', href: '/favicon.png' },
     { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
-    { rel: 'alternate', type: 'application/rss+xml', title: `${user.name}'s recent pull requests`, href: '/feed.xml' },
+    { rel: 'alternate', type: 'application/rss+xml', title: `${repository.fullName} issues`, href: '/feed.xml' },
   ],
 })
 const url = useRequestURL()
 useSeoMeta({
-  title: `${user.name} is Contributing`,
-  description: `Discover ${user.name} recent pull requests on GitHub.`,
-  ogTitle: `${user.name} is Contributing`,
-  ogDescription: `Discover ${user.name} recent pull requests on GitHub.`,
+  title: `${repository.fullName} Status`,
+  description: `Track the latest issues and status updates for ${repository.fullName} repository.`,
+  ogTitle: `${repository.fullName} Status`,
+  ogDescription: `Track the latest issues and status updates for ${repository.fullName} repository.`,
   twitterCard: 'summary_large_image',
   ogImage: `${url.origin}/og.png`,
   twitterImage: `${url.origin}/og.png`,
@@ -31,27 +35,43 @@ useSeoMeta({
 <template>
   <UContainer class="p-4 sm:p-6 lg:p-8 lg:pt-10 max-w-3xl">
     <div class="flex flex-col items-center gap-2">
-      <a :href="userUrl" target="_blank"><UAvatar
-        :src="user.avatar"
-        :alt="user.name"
-        size="xl"
-      />
+      <a :href="repoUrl" target="_blank">
+        <UAvatar
+          :src="repository.avatar"
+          :alt="repository.fullName"
+          size="xl"
+          :class="repository.type === 'Organization' ? 'rounded-lg' : 'rounded-full'"
+        />
       </a>
       <h1 class="text-2xl sm:text-3xl text-center">
-        <a :href="userUrl" target="_blank">
-          {{ user.name }}
+        <a :href="repoUrl" target="_blank">
+          {{ repository.fullName }}
         </a>
-        is <span class="animate-pulse">Contributing...</span>
+        <span class="animate-pulse">Status</span>
       </h1>
-      <p class="text-center text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-300">
-        <NuxtLink :to="userUrl" target="_blank">
-          @{{ user.username }}'s recent pull requests on GitHub.
-        </NuxtLink>
+      <p v-if="repository.description" class="text-center text-neutral-500 dark:text-neutral-400 max-w-lg">
+        {{ repository.description }}
       </p>
+
+      <div class="flex items-center gap-4 mt-2">
+        <div class="flex items-center gap-1 text-green-600 dark:text-green-400">
+          <UIcon name="i-lucide-circle-dot" class="size-4" />
+          <span class="text-sm">{{ openIssues.length }} open</span>
+        </div>
+        <div class="flex items-center gap-1 text-purple-600 dark:text-purple-400">
+          <UIcon name="i-lucide-check-circle" class="size-4" />
+          <span class="text-sm">{{ closedIssues.length }} closed</span>
+        </div>
+        <div class="flex items-center gap-1 text-neutral-600 dark:text-neutral-400">
+          <UIcon name="i-lucide-star" class="size-4" />
+          <span class="text-sm">{{ new Intl.NumberFormat().format(repository.stars) }}</span>
+        </div>
+      </div>
+
       <div class="flex items-center justify-center gap-1 text-neutral-700 dark:text-neutral-300">
         <ClientOnly>
           <UButton
-            :aria-label="`${user.name}'s GitHub profile`"
+            :aria-label="'Toggle dark mode'"
             :icon="colorMode.value === 'dark' ? 'i-lucide-moon' : 'i-lucide-sun'"
             color="neutral"
             variant="link"
@@ -62,10 +82,19 @@ useSeoMeta({
           </template>
         </ClientOnly>
         <UButton
-          :to="userUrl"
+          :to="ownerUrl"
           external
           target="_blank"
-          :aria-label="`${user.name}'s GitHub profile`"
+          :aria-label="`${repository.owner}'s GitHub profile`"
+          icon="i-lucide-user"
+          color="neutral"
+          variant="link"
+        />
+        <UButton
+          :to="repoUrl"
+          external
+          target="_blank"
+          aria-label="Repository on GitHub"
           icon="i-lucide-github"
           color="neutral"
           variant="link"
@@ -84,7 +113,7 @@ useSeoMeta({
     </div>
 
     <div class="flex flex-col gap-6 sm:gap-10">
-      <PullRequest v-for="pr of prs" :key="pr.url" :data="pr" />
+      <Issue v-for="issue of issues" :key="issue.url" :data="issue" />
     </div>
   </UContainer>
 </template>
