@@ -21,10 +21,10 @@ export default defineEventHandler(async (event) => {
 
   for (const issue of issues) {
     const stateText = issue.state === 'open' ? '🟢 Open' : '🟣 Closed'
-    const labelsText = issue.labels.length > 0 
-      ? ` | Labels: ${issue.labels.map(l => l.name).join(', ')}` 
+    const labelsText = issue.labels.length > 0
+      ? ` | Labels: ${issue.labels.map(l => l.name).join(', ')}`
       : ''
-    
+
     feed.addItem({
       link: issue.url,
       date: new Date(issue.updated_at),

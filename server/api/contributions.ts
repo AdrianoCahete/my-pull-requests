@@ -1,14 +1,14 @@
 export default defineEventHandler(async () => {
   const octokit = useOctokit()
   const config = useAppConfig()
-  
+
   // Get repository configuration from environment variables or app config
-  const repoOwner = process.env.NUXT_REPO_OWNER || config.repo?.owner || 'microsoft'
-  const repoName = process.env.NUXT_REPO_NAME || config.repo?.name || 'vscode'
-  
+  const repoOwner = process.env.NUXT_REPO_OWNER || config.repo?.owner || 'nuxt'
+  const repoName = process.env.NUXT_REPO_NAME || config.repo?.name || 'nuxt'
+
   // Fetch repository details
   const repo = await fetchRepo(repoOwner, repoName)
-  
+
   const repository: Repository = {
     owner: repo.owner.login,
     name: repo.name,
@@ -20,14 +20,17 @@ export default defineEventHandler(async () => {
   }
 
   // Fetch issues from the repository
-  const { data: issuesData } = await octokit.request('GET /repos/{owner}/{repo}/issues', {
-    owner: repoOwner,
-    repo: repoName,
-    state: 'all',
-    per_page: 50,
-    sort: 'updated',
-    direction: 'desc',
-  })
+  const { data: issuesData } = await octokit.request(
+    'GET /repos/{owner}/{repo}/issues',
+    {
+      owner: repoOwner,
+      repo: repoName,
+      state: 'all',
+      per_page: 50,
+      sort: 'updated',
+      direction: 'desc',
+    },
+  )
 
   // Filter out pull requests (GitHub API includes PRs in issues endpoint)
   const filteredIssues = issuesData.filter(issue => !issue.pull_request)
@@ -43,10 +46,11 @@ export default defineEventHandler(async () => {
       username: issue.user ? issue.user.login : 'unknown',
       avatar: issue.user ? issue.user.avatar_url : '',
     },
-    labels: issue.labels?.map(label => ({
-      name: typeof label === 'string' ? label : label.name || '',
-      color: typeof label === 'string' ? '000000' : label.color || '000000',
-    })) || [],
+    labels:
+      issue.labels?.map(label => ({
+        name: typeof label === 'string' ? label : label.name || '',
+        color: typeof label === 'string' ? '000000' : label.color || '000000',
+      })) || [],
     comments: issue.comments || 0,
   }))
 
