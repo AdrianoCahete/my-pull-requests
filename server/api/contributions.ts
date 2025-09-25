@@ -40,8 +40,8 @@ export default defineEventHandler(async () => {
     state: issue.state as 'open' | 'closed',
     number: issue.number,
     author: {
-      username: issue.user?.login || 'unknown',
-      avatar: issue.user?.avatar_url || '',
+      username: issue.user ? issue.user.login : 'unknown',
+      avatar: issue.user ? issue.user.avatar_url : '',
     },
     labels: issue.labels?.map(label => ({
       name: typeof label === 'string' ? label : label.name || '',
