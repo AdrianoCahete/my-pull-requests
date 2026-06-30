@@ -26,6 +26,64 @@ useSeoMeta({
   ogImage: `${url.origin}/og.png`,
   twitterImage: `${url.origin}/og.png`,
 })
+
+const order = ref<'asc' | 'desc'>('desc')
+const orderKey = ref<'date' | 'star'>('date')
+
+const items = computed(() => [
+  [{
+    label: 'Star',
+    icon: 'i-lucide-star',
+    checked: orderKey.value === 'star',
+    type: 'checkbox' as const,
+    onUpdateChecked(checked: boolean) {
+      orderKey.value = checked ? 'star' : 'date'
+    },
+    onSelect(e: Event) {
+      e.preventDefault()
+    },
+  }],
+  [{
+    label: orderKey.value === 'date' ? 'Oldset' : 'Ascending',
+    icon: 'i-lucide-arrow-up-narrow-wide',
+    checked: order.value === 'asc',
+    type: 'checkbox' as const,
+    onUpdateChecked(checked: boolean) {
+      if (!checked) return
+      order.value = 'asc'
+    },
+    onSelect(e: Event) {
+      e.preventDefault()
+    },
+  }, {
+    label: orderKey.value === 'date' ? 'Newest' : 'Descending',
+    icon: 'i-lucide-arrow-down-narrow-wide',
+    checked: order.value === 'desc',
+    type: 'checkbox' as const,
+    onUpdateChecked(checked: boolean) {
+      if (!checked) return
+      order.value = 'desc'
+    },
+    onSelect(e: Event) {
+      e.preventDefault()
+    },
+  }],
+])
+
+const orderedPrs = computed(() => {
+  const sortedPrs = [...prs]
+  sortedPrs.sort((a, b) => {
+    if (orderKey.value === 'star') {
+      return order.value === 'asc' ? a.stars - b.stars : b.stars - a.stars
+    }
+    else {
+      const dateA = new Date(a.created_at).getTime()
+      const dateB = new Date(b.created_at).getTime()
+      return order.value === 'asc' ? dateA - dateB : dateB - dateA
+    }
+  })
+  return sortedPrs
+})
 </script>
 
 <template>
@@ -83,8 +141,32 @@ useSeoMeta({
       <USeparator class="mt-2 sm:mt-6 mb-6 sm:mb-10 w-1/2 mx-auto animate-pulse" />
     </div>
 
-    <div class="flex flex-col gap-6 sm:gap-10">
-      <PullRequest v-for="pr of prs" :key="pr.url" :data="pr" />
+    <div class="relative">
+      <div class="flex justify-end absolute -top-10 lg:-top-12 right-0">
+        <UDropdownMenu
+          :items="items"
+          :content="{
+            align: 'start',
+            side: 'bottom',
+            sideOffset: 8,
+          }"
+          :ui="{
+            content: 'w-48',
+          }"
+          size="xs"
+        >
+          <UButton
+            :label="orderKey === 'star' ? 'Stars': order === 'asc' ? 'Oldset': 'Newset'"
+            :icon="order === 'asc' ? 'i-lucide-arrow-up-narrow-wide': 'i-lucide-arrow-down-narrow-wide' "
+            color="neutral"
+            variant="soft"
+            size="xs"
+          />
+        </UDropdownMenu>
+      </div>
+      <div class="flex flex-col gap-6 mt-5 sm:gap-10">
+        <PullRequest v-for="pr of orderedPrs" :key="pr.url" :data="pr" />
+      </div>
     </div>
   </UContainer>
 </template>
